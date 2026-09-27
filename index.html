@@ -1026,7 +1026,16 @@ async function submitTool() {
     const res = await fetch("https://forminit.com/f/nbcomhc4z98", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Accept": "application/json" },
-      body: JSON.stringify(data)
+      body: JSON.stringify({
+        blocks: [
+          { type: "sender", properties: { email: data.email } },
+          { type: "text", name: "tool_name",   value: data.tool_name },
+          { type: "text", name: "tool_url",    value: data.tool_url },
+          { type: "text", name: "category",    value: data.category },
+          { type: "text", name: "pricing",     value: data.pricing },
+          { type: "text", name: "description", value: data.description }
+        ]
+      })
     });
 
     if (res.ok) {
@@ -1034,7 +1043,8 @@ async function submitTool() {
       ids.forEach(id => document.getElementById(id).value = "");
       setTimeout(() => document.getElementById("successMsg").style.display = "none", 6000);
     } else {
-      alert("Something went wrong. Please try again.");
+      const err = await res.json().catch(() => ({}));
+      alert(err.message || "Something went wrong. Please try again.");
     }
   } catch(e) {
     alert("Network error. Please check your connection and try again.");
