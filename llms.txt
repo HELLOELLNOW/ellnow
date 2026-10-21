@@ -1,0 +1,34 @@
+# Ellnow
+
+> Ellnow (ellnow.com) is a free directory of 200+ AI tools across 15 categories. Each listing shows what the tool does, whether it is free, freemium or paid, and an editor's score. New tools are added weekly.
+
+Ellnow lists tools people can sign up for and use directly. Each product is listed once; duplicate or copycat listings are not accepted. Scores are editor's scores, not user reviews.
+
+## Main pages
+
+- [Ellnow home and full tool list](https://www.ellnow.com/): all tools, searchable and filterable by category and pricing
+- [FAQ](https://www.ellnow.com/#faq): answers to common questions, such as the best AI video, image, writing, coding and voice tools
+- [Submit a tool](https://www.ellnow.com/#submit): how AI tool makers can request a listing
+
+## Categories (tool count, top-rated picks)
+
+- Video (25): Sora, Runway, Veo 3, HeyGen, Synthesia
+- Image (21): Midjourney, Flux, DALL·E 3, Remove.bg, Magnific
+- Productivity (21): ChatGPT, Claude, Perplexity, NotebookLM, Fathom
+- Code (20): GitHub Copilot, Cursor, Claude Code, Bolt.new
+- Writing (18): Grammarly, Jasper, Notion AI, Sudowrite
+- Audio (17): ElevenLabs, Suno, Adobe Podcast, Krisp, Udio
+- Marketing (15): Surfer SEO, AdCreative.ai, Jasper Campaigns, Soro
+- 3D & Design (13): Framer AI, Luma AI, Figma AI, Galileo AI, Krea AI
+- Chatbots (13): Intercom Fin, Grok, Microsoft Copilot, Botpress, Voiceflow
+- Business (11): Gong, Apollo.io, Clay, HubSpot AI
+- Education (9): Duolingo Max, Khanmigo, Socratic, Quizlet AI
+- Search (8): Perplexity Pro, Elicit, Phind, Consensus
+- Presentations (6): Gamma, Canva Presentations, Tome, Beautiful.ai
+- Avatar (6): D-ID, Hedra, Akool, Viggle
+- Health (6): Whoop AI, Calm AI, Ada Health
+
+## Optional
+
+- [Sitemap](https://www.ellnow.com/sitemap.xml)
+- Contact: hello@ellnow.com
