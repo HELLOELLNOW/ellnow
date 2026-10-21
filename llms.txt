@@ -18,7 +18,7 @@ Ellnow lists tools people can sign up for and use directly. Each product is list
 - Code (20): GitHub Copilot, Cursor, Claude Code, Bolt.new
 - Writing (18): Grammarly, Jasper, Notion AI, Sudowrite
 - Audio (17): ElevenLabs, Suno, Adobe Podcast, Krisp, Udio
-- Marketing (15): Surfer SEO, AdCreative.ai, Jasper Campaigns, Soro
+- Marketing (15): Surfer SEO, AdCreative.ai, Jasper Campaigns, Phrasee
 - 3D & Design (13): Framer AI, Luma AI, Figma AI, Galileo AI, Krea AI
 - Chatbots (13): Intercom Fin, Grok, Microsoft Copilot, Botpress, Voiceflow
 - Business (11): Gong, Apollo.io, Clay, HubSpot AI
