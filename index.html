@@ -311,6 +311,20 @@
 .faq-item[open] summary::after{content:"−"}
 .faq-item p{padding:0 1.25rem 1rem;color:var(--text2);font-size:14px;line-height:1.6;margin:0}
 </style>
+<style>
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:.9rem;text-align:left}
+.plan{position:relative;display:flex;flex-direction:column;gap:2px;border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:14px 16px;cursor:pointer;transition:border-color .2s,background .2s}
+.plan:hover{border-color:rgba(255,255,255,.4)}
+.plan input{position:absolute;opacity:0;pointer-events:none}
+.plan:has(input:checked){border-color:#fff;background:rgba(255,255,255,.07)}
+.plan:has(input:focus-visible){outline:2px solid #fff;outline-offset:2px}
+.plan-name{color:#fff;font-weight:600;font-size:15px}
+.plan-price{color:#fff;font-size:20px;font-family:var(--font-serif)}
+.plan-price small{font-family:var(--font-sans);font-size:12px;color:rgba(255,255,255,.5)}
+.plan-desc{color:rgba(255,255,255,.55);font-size:13px;line-height:1.45;margin-top:2px}
+.plan-policy{color:rgba(255,255,255,.4);font-size:12.5px;line-height:1.5;margin:0 0 1.5rem}
+@media (max-width:640px){.plans{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 
@@ -597,7 +611,22 @@
   <div class="submit-inner">
     <div class="sub-eyebrow">For developers & founders</div>
     <h2>Got an AI tool?<br><em>Get listed.</em></h2>
-    <p>Submit your tool and reach thousands of people searching for AI solutions every day.</p>
+    <p>Submit your tool and reach people searching for the right AI tool.</p>
+    <div class="plans" role="radiogroup" aria-label="Listing type">
+      <label class="plan">
+        <input type="radio" name="plan" value="free" checked onchange="setPlan('free')" />
+        <span class="plan-name">Free</span>
+        <span class="plan-price">$0</span>
+        <span class="plan-desc">Standard review, usually within 2–4 weeks.</span>
+      </label>
+      <label class="plan">
+        <input type="radio" name="plan" value="fasttrack" onchange="setPlan('fasttrack')" />
+        <span class="plan-name">Fast-track</span>
+        <span class="plan-price">$19 <small>one-time</small></span>
+        <span class="plan-desc">Reviewed within 48 hours. Full refund if not approved.</span>
+      </label>
+    </div>
+    <p class="plan-policy">We list AI tools people can sign up for and use. One listing per product. Paying speeds up review; it doesn't guarantee approval or change a tool's score.</p>
     <div class="form">
       <div class="form-row">
         <input type="text" id="fName" placeholder="Tool name" />
@@ -608,7 +637,8 @@
         <option>Video</option><option>Image</option><option>Audio</option>
         <option>Code</option><option>Writing</option><option>Productivity</option>
         <option>3D & Design</option><option>Presentations</option><option>Search</option>
-        <option>Marketing</option><option>Other</option>
+        <option>Marketing</option><option>Chatbots</option><option>Avatar</option>
+        <option>Business</option><option>Education</option><option>Health</option><option>Other</option>
       </select>
       <div class="form-row">
         <select id="fPrice">
@@ -620,8 +650,8 @@
         <input type="email" id="fEmail" placeholder="Your email" />
       </div>
       <textarea id="fDesc" placeholder="What does your tool do? (1–2 sentences)"></textarea>
-      <button class="form-btn" onclick="submitTool()">Submit for review →</button>
-      <div class="success-msg" id="successMsg">✓ Received! We'll review your submission within 48 hours.</div>
+      <button class="form-btn" onclick="submitTool()">Submit for free review →</button>
+      <div class="success-msg" id="successMsg">✓ Received! We'll email you once your tool is reviewed.</div>
     </div>
   </div>
 </section>
@@ -1297,6 +1327,15 @@ function handleSearch() {
   document.getElementById("tools").scrollIntoView({ behavior: "smooth" });
 }
 
+// Stripe Payment Link for Fast-track. Leave "" until the link exists:
+// Fast-track requests still come through, marked "fasttrack", and you send the payment link by email.
+const FASTTRACK_PAYMENT_URL = "";
+let plan = "free";
+function setPlan(p) {
+  plan = p;
+  document.querySelector(".form-btn").textContent = p === "fasttrack" ? "Submit and pay $19 →" : "Submit for free review →";
+}
+
 async function submitTool() {
   const ids = ["fName","fUrl","fCat","fPrice","fEmail","fDesc"];
   const values = ids.map(id => document.getElementById(id).value.trim());
@@ -1326,15 +1365,25 @@ async function submitTool() {
           { type: "text", name: "tool_url",    value: data.tool_url },
           { type: "text", name: "category",    value: data.category },
           { type: "text", name: "pricing",     value: data.pricing },
-          { type: "text", name: "description", value: data.description }
+          { type: "text", name: "description", value: data.description },
+          { type: "text", name: "listing_type", value: plan === "fasttrack" ? "fasttrack ($19)" : "free" }
         ]
       })
     });
 
     if (res.ok) {
-      document.getElementById("successMsg").style.display = "block";
+      const msg = document.getElementById("successMsg");
+      if (plan === "fasttrack") {
+        msg.textContent = FASTTRACK_PAYMENT_URL
+          ? "✓ Received! Taking you to secure checkout to pay the $19 Fast-track fee…"
+          : "✓ Received! We'll email you a secure link to pay the $19 Fast-track fee. Review starts once it's paid.";
+        if (FASTTRACK_PAYMENT_URL) setTimeout(() => { window.location.href = FASTTRACK_PAYMENT_URL; }, 1500);
+      } else {
+        msg.textContent = "✓ Received! We'll email you once your tool is reviewed.";
+      }
+      msg.style.display = "block";
       ids.forEach(id => document.getElementById(id).value = "");
-      setTimeout(() => document.getElementById("successMsg").style.display = "none", 6000);
+      setTimeout(() => document.getElementById("successMsg").style.display = "none", 9000);
     } else {
       const err = await res.json().catch(() => ({}));
       alert(err.message || "Something went wrong. Please try again.");
@@ -1342,7 +1391,7 @@ async function submitTool() {
   } catch(e) {
     alert("Network error. Please check your connection and try again.");
   } finally {
-    btn.textContent = "Submit for review →";
+    setPlan(plan);
     btn.disabled = false;
   }
 }
