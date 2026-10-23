@@ -1,4 +1,7 @@
 {
+  "buildCommand": "node scripts/build.js",
+  "outputDirectory": "dist",
+  "cleanUrls": true,
   "redirects": [
     {
       "source": "/submit",
