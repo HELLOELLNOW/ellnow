@@ -323,6 +323,7 @@
 .plan-price small{font-family:var(--font-sans);font-size:12px;color:rgba(255,255,255,.5)}
 .plan-desc{color:rgba(255,255,255,.55);font-size:13px;line-height:1.45;margin-top:2px}
 .plan-policy{color:rgba(255,255,255,.4);font-size:12.5px;line-height:1.5;margin:0 0 1.5rem}
+.plan-policy a{color:rgba(255,255,255,.75);text-decoration:underline}
 @media (max-width:640px){.plans{grid-template-columns:1fr}}
 </style>
 </head>
@@ -626,7 +627,7 @@
         <span class="plan-desc">Reviewed within 48 hours. Full refund if not approved.</span>
       </label>
     </div>
-    <p class="plan-policy">We list AI tools people can sign up for and use. One listing per product. Paying speeds up review; it doesn't guarantee approval or change a tool's score.</p>
+    <p class="plan-policy">We list AI tools people can sign up for and use. One listing per product. Paying speeds up review; it doesn't guarantee approval or change a tool's score. By submitting, you agree to the <a href="/terms" target="_blank" rel="noopener">Listing Terms</a>.</p>
     <div class="form">
       <div class="form-row">
         <input type="text" id="fName" placeholder="Tool name" />
@@ -699,6 +700,7 @@
     <a href="#" onclick="document.getElementById('aboutModal').classList.add('open'); return false;">About</a>
     <a href="#submit">Submit a Tool</a>
     <a href="#" onclick="document.getElementById('newsletterModal').classList.add('open'); return false;">Newsletter</a>
+    <a href="/terms">Terms</a>
   </div>
   <p>© 2025 Ellnow · Find the right AI tool, right now.</p>
 </footer>
