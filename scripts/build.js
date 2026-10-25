@@ -20,6 +20,14 @@ const YEAR = TODAY.slice(0, 4);
 // Value = the domain shown to visitors.
 const AFFILIATE_HOSTS = { "try.elevenlabs.io": "elevenlabs.io", "get.murf.ai": "murf.ai", "trysoro.com": "trysoro.com" };
 
+// Paid placements (see /advertise). Set a Stripe Payment Link URL to turn on the Buy button;
+// with "" the button falls back to emailing hello@ellnow.com.
+const ADVERTISE = {
+  spotlight: { name: "Homepage Spotlight", price: 99, url: "" },
+  category: { name: "Category Featured", price: 39, url: "" },
+  categorySlots: 3,
+};
+
 // ---------- read source ----------
 const src = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
 const start = src.indexOf("const tools = [");
@@ -39,7 +47,8 @@ const logoSvg = (src.match(/<a href="#" class="nav-logo">\s*(<svg[\s\S]*?<\/svg>
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const slug = s => String(s).toLowerCase().replace(/&/g, " and ").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const isAffiliate = url => { try { return Object.hasOwn(AFFILIATE_HOSTS, new URL(url).hostname); } catch { return false; } };
-const rel = url => isAffiliate(url) ? "sponsored noopener" : "noopener";
+const isFeatured = t => !!t.featured && (!t.featuredUntil || t.featuredUntil >= TODAY);
+const rel = (url, t) => (isAffiliate(url) || (t && isFeatured(t))) ? "sponsored noopener" : "noopener";
 const byRating = (a, b) => b.rating - a.rating;
 const displayHost = url => { const h = new URL(url).hostname; return AFFILIATE_HOSTS[h] || h.replace(/^www\./, ""); };
 const score = r => Number(r).toFixed(1);
@@ -58,7 +67,7 @@ for (const t of tools) {
   t.slug = s;
 }
 const cats = [...new Set(tools.map(t => t.cat))];
-const byCat = Object.fromEntries(cats.map(c => [c, tools.filter(t => t.cat === c).sort(byRating)]));
+const byCat = Object.fromEntries(cats.map(c => [c, tools.filter(t => t.cat === c).sort((a, b) => (isFeatured(b) - isFeatured(a)) || byRating(a, b))]));
 cats.sort((a, b) => byCat[b].length - byCat[a].length);
 
 // ---------- shared page shell ----------
@@ -88,6 +97,14 @@ const pageCss = `
 .chips a { border: 1px solid var(--border); border-radius: 999px; padding: .4rem .85rem; font-size: 13px; color: var(--text2); text-decoration: none; background: var(--card); }
 .chips a:hover { border-color: var(--accent); color: var(--accent); }
 .cat-links { max-width: 1200px; margin: 0 auto; padding: 0 2rem 1rem; }
+.feat-pill { display: inline-block; font-family: var(--font-sans); font-size: 10.5px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 999px; vertical-align: middle; margin-left: .4rem; }
+.ad-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 1rem 0 .5rem; }
+.ad-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; display: flex; flex-direction: column; gap: .4rem; }
+.ad-card h3 { font-size: 16px; }
+.ad-price { font-family: var(--font-serif); font-size: 28px; }
+.ad-price small { font-family: var(--font-sans); font-size: 13px; color: var(--text2); }
+.ad-card ul { padding-left: 1.1rem; font-size: 14px; color: var(--text2); line-height: 1.6; flex: 1; }
+.ad-status { font-size: 13px; color: var(--text2); }
 @media (max-width: 640px) { .page { padding: 88px 1.25rem 3rem; } .page h1 { font-size: 27px; } .facts th { width: 40%; } .list .hide-sm { display: none; } }
 `;
 write("assets/site.css", mainCss + "\n" + pageCss);
@@ -118,6 +135,7 @@ const shell = ({ title, description, canonical, body, jsonld }) => `<!DOCTYPE ht
   </a>
   <div class="nav-links">
     <a href="/#tools">Browse</a>
+    <a href="/advertise">Advertise</a>
     <a href="/#submit" class="nav-cta">Submit a Tool</a>
   </div>
 </nav>
@@ -129,6 +147,8 @@ ${body}
     <a href="/">Home</a>
     <a href="/#faq">FAQ</a>
     <a href="/#submit">Submit a Tool</a>
+    <a href="/advertise">Advertise</a>
+    <a href="/terms">Terms</a>
   </div>
   <p>© ${YEAR} Ellnow · Find the right AI tool, right now.</p>
 </footer>
@@ -146,10 +166,10 @@ const catChips = current => `<div class="chips">${cats.filter(c => c !== current
 for (const t of tools) {
   const url = `${SITE}/tools/${t.slug}`;
   const catUrl = `/category/${slug(t.cat)}`;
-  const alts = byCat[t.cat].filter(x => x !== t).slice(0, 6);
+  const alts = [...byCat[t.cat]].sort(byRating).filter(x => x !== t).slice(0, 6);
   const aff = isAffiliate(t.url);
   const body = `<div class="crumbs"><a href="/">Ellnow</a> › <a href="${catUrl}">${esc(t.cat)}</a> › ${esc(t.name)}</div>
-<h1>${esc(t.icon)} ${esc(t.name)}</h1>
+<h1>${esc(t.icon)} ${esc(t.name)}${isFeatured(t) ? ' <span class="feat-pill">Featured</span>' : ""}</h1>
 <p class="lead">${esc(t.name)} is ${pricingPhrase(t.pricing)} AI ${esc(t.cat.toLowerCase())} tool. ${esc(t.desc)}</p>
 <table class="facts">
   <tr><th>Category</th><td><a href="${catUrl}">${esc(t.cat)}</a></td></tr>
@@ -157,8 +177,9 @@ for (const t of tools) {
   <tr><th>Editor's score</th><td>${score(t.rating)} / 5</td></tr>
   <tr><th>Website</th><td>${esc(displayHost(t.url))}</td></tr>
 </table>
-<a class="visit-btn" href="${esc(t.url)}" target="_blank" rel="${rel(t.url)}">Visit ${esc(t.name)} →</a>
+<a class="visit-btn" href="${esc(t.url)}" target="_blank" rel="${rel(t.url, t)}">Visit ${esc(t.name)} →</a>
 ${aff ? `<p class="note">Ellnow may earn a commission if you sign up through this link. It doesn't change the listing or score.</p>` : ""}
+${isFeatured(t) ? `<p class="note">This is a paid Featured placement. It doesn't change the tool's score.</p>` : ""}
 ${alts.length ? `<h2>Alternatives to ${esc(t.name)}</h2>
 <table class="list">
   <tr><th>Tool</th><th class="hide-sm">What it does</th><th>Pricing</th><th>Score</th></tr>
@@ -184,7 +205,7 @@ for (const c of cats) {
   const list = byCat[c];
   const s = slug(c);
   const url = `${SITE}/category/${s}`;
-  const top3 = list.slice(0, 3).map(t => t.name);
+  const top3 = [...list].sort(byRating).slice(0, 3).map(t => t.name);
   const freeCount = list.filter(t => t.pricing !== "paid").length;
   const title = `Best ${catTitle(c)} in ${YEAR}`;
   const body = `<div class="crumbs"><a href="/">Ellnow</a> › ${esc(c)}</div>
@@ -192,7 +213,7 @@ for (const c of cats) {
 <p class="lead">The top-rated ${esc(lowerTitle(c))} on Ellnow are ${esc(listJoin(top3))}. Ellnow lists ${list.length} in this category, and ${freeCount} of them are free or have a free plan. Scores are editor's scores out of 5.</p>
 <table class="list">
   <tr><th>Tool</th><th class="hide-sm">What it does</th><th>Pricing</th><th>Score</th></tr>
-${list.map(t => `  <tr><td><a href="/tools/${t.slug}">${esc(t.name)}</a></td><td class="hide-sm">${esc(t.desc)}</td><td>${pricingText(t.pricing)}</td><td>${score(t.rating)}</td></tr>`).join("\n")}
+${list.map(t => `  <tr><td><a href="/tools/${t.slug}">${esc(t.name)}</a>${isFeatured(t) ? '<span class="feat-pill">Featured</span>' : ""}</td><td class="hide-sm">${esc(t.desc)}</td><td>${pricingText(t.pricing)}</td><td>${score(t.rating)}</td></tr>`).join("\n")}
 </table>
 <h2>Other categories</h2>
 ${catChips(c)}`;
@@ -211,7 +232,7 @@ ${catChips(c)}`;
 
 // ---------- home page ----------
 let home = src;
-const cards = tools.map(t => `<a class="tool-card" href="${esc(t.url)}" target="_blank" rel="${rel(t.url)}"><div class="tool-top"><div class="tool-icon">${t.icon}</div><div><div class="tool-name">${esc(t.name)}</div><div class="tool-cat">${esc(t.cat)}</div></div></div><div class="tool-desc">${esc(t.desc)}</div><div class="tool-foot"><span class="tbadge ${t.pricing}">${t.pricing}</span><span class="tool-rating"><span class="star">★</span> ${t.rating}</span><span class="visit">Visit →</span></div></a>`).join("\n");
+const cards = tools.map(t => `<a class="tool-card${isFeatured(t) ? " is-featured" : ""}" href="${esc(t.url)}" target="_blank" rel="${rel(t.url, t)}">${isFeatured(t) ? '<span class="feat-badge">Featured</span>' : ""}<div class="tool-top"><div class="tool-icon">${t.icon}</div><div><div class="tool-name">${esc(t.name)}</div><div class="tool-cat">${esc(t.cat)}</div></div></div><div class="tool-desc">${esc(t.desc)}</div><div class="tool-foot"><span class="tbadge ${t.pricing}">${t.pricing}</span><span class="tool-rating"><span class="star">★</span> ${t.rating}</span><span class="visit">Visit →</span></div></a>`).join("\n");
 const sm = /<!-- STATIC-TOOLS:START[^>]*-->\n[\s\S]*?\n<!-- STATIC-TOOLS:END -->/;
 if (!sm.test(home)) throw new Error("STATIC-TOOLS markers not found in index.html");
 home = home.replace(sm, m => m.split("\n")[0] + "\n" + cards + "\n<!-- STATIC-TOOLS:END -->");
@@ -235,8 +256,65 @@ for (const f of fs.readdirSync(ROOT)) {
   if (fs.statSync(p).isFile()) fs.copyFileSync(p, path.join(OUT, f));
 }
 
+// ---------- advertise page ----------
+{
+  const spot = tools.find(t => t.featured === "spotlight" && isFeatured(t));
+  const catFeatured = Object.fromEntries(cats.map(c => [c, byCat[c].filter(isFeatured).length]));
+  const full = cats.filter(c => catFeatured[c] >= ADVERTISE.categorySlots);
+  const buy = (o, label) => o.url
+    ? `<a class="visit-btn" href="${esc(o.url)}" target="_blank" rel="noopener">${label}</a>`
+    : `<a class="visit-btn" href="mailto:hello@ellnow.com?subject=${encodeURIComponent(o.name + " on Ellnow")}">Email to book</a>`;
+  const body = `<div class="crumbs"><a href="/">Ellnow</a> › Advertise</div>
+<h1>Advertise on Ellnow</h1>
+<p class="lead">Put your AI tool in front of people who are choosing one. Every paid placement is labeled "Featured" and runs for 30 days. Paying never changes a tool's score.</p>
+<div class="ad-grid">
+  <div class="ad-card">
+    <h3>${ADVERTISE.spotlight.name}</h3>
+    <div class="ad-price">$${ADVERTISE.spotlight.price} <small>/ 30 days</small></div>
+    <ul>
+      <li>The one Spotlight slot at the top of the homepage tool list</li>
+      <li>Top spot and Featured badge in your category</li>
+      <li>Featured badge on your tool page</li>
+    </ul>
+    <p class="ad-status">${spot ? `Booked until ${esc(spot.featuredUntil || "further notice")}` : "Available now"}</p>
+    ${buy(ADVERTISE.spotlight, `Book Spotlight · $${ADVERTISE.spotlight.price}`)}
+  </div>
+  <div class="ad-card">
+    <h3>${ADVERTISE.category.name}</h3>
+    <div class="ad-price">$${ADVERTISE.category.price} <small>/ 30 days</small></div>
+    <ul>
+      <li>Top of your category page and category filter</li>
+      <li>Highlighted card with a Featured badge</li>
+      <li>Up to ${ADVERTISE.categorySlots} tools per category</li>
+    </ul>
+    <p class="ad-status">${full.length ? `Full: ${esc(full.join(", "))}` : "Open in every category"}</p>
+    ${buy(ADVERTISE.category, `Book Category Featured · $${ADVERTISE.category.price}`)}
+  </div>
+  <div class="ad-card">
+    <h3>Fast-track review</h3>
+    <div class="ad-price">$19 <small>one-time</small></div>
+    <ul>
+      <li>Reviewed within 48 hours</li>
+      <li>Full refund if not approved</li>
+      <li>A permanent standard listing</li>
+    </ul>
+    <p class="ad-status">Not listed yet? Start here.</p>
+    <a class="visit-btn" href="/#submit">Submit a tool</a>
+  </div>
+</div>
+<h2>How it works</h2>
+<ul class="lead">
+  <li>Your tool needs to be listed on Ellnow, or approved through Fast-track, before a placement starts.</li>
+  <li>After you pay, we confirm the start date by email. The placement runs for 30 days and then ends on its own. There's no subscription.</li>
+  <li>Featured links are marked as sponsored, as search engines require for paid links.</li>
+  <li>We don't sell placements to tools on our <a href="/terms#not-accepted">not-accepted list</a>. If we can't run your placement, you get a full refund.</li>
+</ul>
+<p class="note">Ellnow is a new, growing directory, and prices reflect that. Questions? Email <a href="mailto:hello@ellnow.com">hello@ellnow.com</a>. Placements are covered by the <a href="/terms">Listing Terms</a>.</p>`;
+  write("advertise.html", shell({ title: "Advertise on Ellnow | Featured AI tool placements", description: `Feature your AI tool on Ellnow: Homepage Spotlight $${ADVERTISE.spotlight.price} or Category Featured $${ADVERTISE.category.price} for 30 days, clearly labeled.`, canonical: `${SITE}/advertise`, body, jsonld: [crumbsLd([["Ellnow", SITE + "/"], ["Advertise", SITE + "/advertise"]])] }));
+}
+
 // ---------- sitemap ----------
-const urls = [[SITE + "/", "1.0"], ...cats.map(c => [`${SITE}/category/${slug(c)}`, "0.8"]), ...tools.map(t => [`${SITE}/tools/${t.slug}`, "0.6"])];
+const urls = [[SITE + "/", "1.0"], [SITE + "/advertise", "0.5"], ...cats.map(c => [`${SITE}/category/${slug(c)}`, "0.8"]), ...tools.map(t => [`${SITE}/tools/${t.slug}`, "0.6"])];
 write("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map(([u, p]) => `  <url><loc>${u}</loc><lastmod>${TODAY}</lastmod><priority>${p}</priority></url>`).join("\n")}
@@ -258,7 +336,7 @@ Ellnow lists tools people can sign up for and use directly. Each product is list
 
 ## Categories
 
-${cats.map(c => `- [Best ${catTitle(c)}](${SITE}/category/${slug(c)}): ${byCat[c].length} tools. Top-rated: ${byCat[c].slice(0, 4).map(t => t.name).join(", ")}`).join("\n")}
+${cats.map(c => `- [Best ${catTitle(c)}](${SITE}/category/${slug(c)}): ${byCat[c].length} tools. Top-rated: ${[...byCat[c]].sort(byRating).slice(0, 4).map(t => t.name).join(", ")}`).join("\n")}
 
 ## Optional
 
