@@ -651,6 +651,7 @@
         <input type="email" id="fEmail" placeholder="Your email" />
       </div>
       <textarea id="fDesc" placeholder="What does your tool do? (1–2 sentences)"></textarea>
+      <input type="text" id="fCompany" name="company_site" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" />
       <button class="form-btn" onclick="submitTool()">Submit for free review →</button>
       <div class="success-msg" id="successMsg">✓ Received! We'll email you once your tool is reviewed.</div>
     </div>
@@ -876,6 +877,8 @@ const tools = [
   {name:"Visily",cat:"3D & Design",desc:"Turn screenshots or prompts into editable UI wireframes instantly.",pricing:"freemium",rating:4.2,icon:"👁",url:"https://visily.ai"},
   {name:"Krea AI",cat:"3D & Design",desc:"Real-time AI image generation for design — renders as you sketch.",pricing:"freemium",rating:4.4,icon:"✏️",url:"https://krea.ai"},
   {name:"Flair AI",cat:"3D & Design",desc:"AI product photo generator — place products in stunning styled scenes.",pricing:"freemium",rating:4.4,icon:"💎",url:"https://flair.ai"},
+  {name:"DecorViz",cat:"3D & Design",desc:"Try furniture in a photo of your own room before you buy, then move, resize and layer pieces into one realistic render.",pricing:"freemium",rating:4.2,icon:"🛋",url:"https://decorviz.ai"},
+  {name:"AI3D Studio",cat:"3D & Design",desc:"Generate 3D models from images or text and export GLB, FBX, STL or USDZ, plus free in-browser 3D tools.",pricing:"freemium",rating:4.1,icon:"🧊",url:"https://ai3d.studio"},
 
   // ── MARKETING (additional) ──
   {name:"Copy.ai Workflows",cat:"Marketing",desc:"Automate entire marketing workflows with AI — from brief to publish.",pricing:"freemium",rating:4.3,icon:"⚙️",url:"https://copy.ai"},
@@ -948,6 +951,7 @@ const tools = [
   {name:"Granola",cat:"Productivity",desc:"AI notepad for meetings — takes your rough notes and turns them into clean structured summaries.",pricing:"freemium",rating:4.5,icon:"🌿",url:"https://granola.ai"},
   {name:"Lindy",cat:"Productivity",desc:"Build AI employees for sales, support and ops — no-code AI agents that connect to your whole stack.",pricing:"freemium",rating:4.4,icon:"🔗",url:"https://lindy.ai"},
   {name:"Zapier AI",cat:"Productivity",desc:"AI-powered automation that connects 6000+ apps — build workflows in plain English.",pricing:"freemium",rating:4.5,icon:"⚡",url:"https://zapier.com/ai"},
+  {name:"Image to Calendar",cat:"Productivity",desc:"Turns schedule photos, screenshots, flyers and PDFs into calendar events you can review and add to Google, Apple or Outlook.",pricing:"freemium",rating:4.1,icon:"📅",url:"https://imagetocalendar.app"},
 
   // ── NEW VIDEO TOOLS ──
   {name:"Higgsfield",cat:"Video",desc:"Generate dynamic AI images and videos with cinematic motion and photorealistic quality.",pricing:"freemium",rating:4.5,icon:"🎬",url:"https://higgsfield.ai"},
@@ -955,10 +959,14 @@ const tools = [
   {name:"Minimax Video",cat:"Video",desc:"High-quality AI video generation with smooth motion and long clip support.",pricing:"freemium",rating:4.4,icon:"🎞",url:"https://minimaxi.com"},
   {name:"Supercut",cat:"Video",desc:"Reliable screen and video recorder with AI transcripts and shareable clip timestamps.",pricing:"freemium",rating:4.4,icon:"✂️",url:"https://supercut.video"},
   {name:"State Property Meme AI",cat:"Video",desc:"Turns one photo into a State Property \"Hit the Road Dude\" meme video. Pick a scene, generate, preview and download.",pricing:"paid",rating:4.0,icon:"🚧",url:"https://statepropertymeme.com"},
+  {name:"Vidmoat",cat:"Video",desc:"Browser-based AI video editor. Edit by chat or on a real timeline, add captions, b-roll and music, and export MP4s.",pricing:"freemium",rating:4.2,icon:"🎛",url:"https://vidmoat.com"},
+  {name:"MotionCasa",cat:"Video",desc:"Turns 5–8 real estate listing photos into an AI property video with camera motion, ready to post as reels.",pricing:"paid",rating:4.0,icon:"🏡",url:"https://motioncasa.com"},
+  {name:"Explainer Video Generator",cat:"Video",desc:"Turns one sentence into a narrated explainer video with subtitles and music, in landscape or vertical format.",pricing:"paid",rating:4.0,icon:"🎓",url:"https://explainervideogenerator.com"},
 
   // ── NEW IMAGE TOOLS ──
   {name:"Grok Aurora",cat:"Image",desc:"xAI's photorealistic image generation model built into Grok — exceptional realism.",pricing:"freemium",rating:4.6,icon:"✨",url:"https://x.ai/grok"},
   {name:"Nano Banana",cat:"Image",desc:"Google's Gemini image model for fast image generation and editing with consistent characters.",pricing:"freemium",rating:4.6,icon:"🍌",url:"https://gemini.google.com"},
+  {name:"Retypit",cat:"Image",desc:"Click any line of text in an image and retype it. The AI keeps the original font, color and style.",pricing:"freemium",rating:4.1,icon:"🔤",url:"https://retypit.ai"},
 
   // ── NEW SEARCH TOOLS ──
   {name:"Perplexity Pro",cat:"Search",desc:"Deep research mode — runs multiple searches and synthesizes comprehensive cited reports.",pricing:"freemium",rating:4.8,icon:"🔍",url:"https://perplexity.ai"},
@@ -967,6 +975,7 @@ const tools = [
 
   // ── NEW WRITING TOOLS ──
   {name:"Talkpal AI",cat:"Writing",desc:"AI language learning tool with real conversation practice in 57+ languages.",pricing:"freemium",rating:4.5,icon:"🗣",url:"https://talkpal.ai"},
+  {name:"FicWeave",cat:"Writing",desc:"AI fanfiction writer that drafts chapters from your premise and keeps characters and facts consistent across a story.",pricing:"freemium",rating:4.0,icon:"📖",url:"https://ficweave.com"},
 
   // ── NEW BUSINESS TOOLS ──
   {name:"Microsoft Agent 365",cat:"Business",desc:"Enterprise AI agent control plane — manage, govern and deploy agents across Microsoft 365.",pricing:"paid",rating:4.4,icon:"🏢",url:"https://microsoft.com/en-us/microsoft-365"},
@@ -975,11 +984,13 @@ const tools = [
 
   // ── NEW EDUCATION TOOLS ──
   {name:"DataCamp AI",cat:"Education",desc:"AI-native learning platform with dynamically generated lessons adapted to each learner.",pricing:"freemium",rating:4.5,icon:"📊",url:"https://datacamp.com"},
+  {name:"Fogsight",cat:"Education",desc:"Turns science, history and math concepts into animated explainers with narration. Backed by an open-source project.",pricing:"freemium",rating:4.2,icon:"🌫",url:"https://fogsight.ai"},
 
   // ── NEW CHATBOT TOOLS ──
   {name:"Grok",cat:"Chatbots",desc:"xAI's real-time AI assistant with live web access, image generation and document analysis.",pricing:"freemium",rating:4.5,icon:"🤖",url:"https://x.ai/grok"},
   {name:"Meta AI",cat:"Chatbots",desc:"Meta's AI assistant built into WhatsApp, Instagram and Facebook — powered by Llama.",pricing:"free",rating:4.3,icon:"♾️",url:"https://meta.ai"},
   {name:"Microsoft Copilot",cat:"Chatbots",desc:"AI assistant across Microsoft 365, Windows and Bing — powered by GPT and Claude.",pricing:"freemium",rating:4.5,icon:"🪟",url:"https://copilot.microsoft.com"},
+  {name:"Robylon",cat:"Chatbots",desc:"AI agents that resolve customer support across email, chat, voice and WhatsApp, with handoff to a human when needed.",pricing:"freemium",rating:4.3,icon:"🎧",url:"https://www.robylon.ai"},
 
 ];
 
@@ -1338,7 +1349,19 @@ function setPlan(p) {
   document.querySelector(".form-btn").textContent = p === "fasttrack" ? "Submit and pay $19 →" : "Submit for free review →";
 }
 
+const FORM_LOADED_AT = Date.now();
+function looksLikeBot() {
+  const trap = document.getElementById("fCompany");
+  return (trap && trap.value.trim() !== "") || (Date.now() - FORM_LOADED_AT < 4000);
+}
+
 async function submitTool() {
+  if (looksLikeBot()) {
+    const m = document.getElementById("successMsg");
+    m.textContent = "✓ Received! We'll email you once your tool is reviewed.";
+    m.style.display = "block";
+    return;
+  }
   const ids = ["fName","fUrl","fCat","fPrice","fEmail","fDesc"];
   const values = ids.map(id => document.getElementById(id).value.trim());
   if (values.some(v => !v)) { alert("Please fill in all fields."); return; }
