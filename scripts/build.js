@@ -24,8 +24,8 @@ const AFFILIATE_HOSTS = { "try.elevenlabs.io": "elevenlabs.io", "get.murf.ai": "
 // Set a Stripe Payment Link URL and the form sends people to checkout after they submit;
 // with "" they see "we'll email you a payment link".
 const ADVERTISE = {
-  spotlight: { name: "Homepage Spotlight", price: 99, url: "" },
-  category: { name: "Category Featured", price: 39, url: "" },
+  spotlight: { name: "Homepage Spotlight", price: 99, url: "https://buy.stripe.com/aFa14h1C5ftb51n1c6g7e01" },
+  category: { name: "Category Featured", price: 39, url: "https://buy.stripe.com/7sYeV72G9bcVfG15smg7e02" },
   categorySlots: 3,
 };
 
