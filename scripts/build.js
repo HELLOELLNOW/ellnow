@@ -20,8 +20,9 @@ const YEAR = TODAY.slice(0, 4);
 // Value = the domain shown to visitors.
 const AFFILIATE_HOSTS = { "try.elevenlabs.io": "elevenlabs.io", "get.murf.ai": "murf.ai", "trysoro.com": "trysoro.com" };
 
-// Paid placements (see /advertise). Set a Stripe Payment Link URL to turn on the Buy button;
-// with "" the button falls back to emailing hello@ellnow.com.
+// Paid placements (see /advertise). Buttons open the booking form on /advertise, which posts to Forminit.
+// Set a Stripe Payment Link URL and the form sends people to checkout after they submit;
+// with "" they see "we'll email you a payment link".
 const ADVERTISE = {
   spotlight: { name: "Homepage Spotlight", price: 99, url: "" },
   category: { name: "Category Featured", price: 39, url: "" },
@@ -105,6 +106,18 @@ const pageCss = `
 .ad-price small { font-family: var(--font-sans); font-size: 13px; color: var(--text2); }
 .ad-card ul { padding-left: 1.1rem; font-size: 14px; color: var(--text2); line-height: 1.6; flex: 1; }
 .ad-status { font-size: 13px; color: var(--text2); }
+.book { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin: 1.5rem 0; scroll-margin-top: 90px; }
+.book h2 { margin-top: 0; }
+.book-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.book label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; color: var(--text2); }
+.book label.full { grid-column: 1 / -1; }
+.book input, .book select, .book textarea { font: inherit; font-size: 14px; font-weight: 400; color: var(--text); background: var(--bg, #fff); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; width: 100%; box-sizing: border-box; }
+.book textarea { min-height: 80px; resize: vertical; }
+.book button { margin-top: 12px; background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 13px 18px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.book button:disabled { opacity: .6; cursor: default; }
+.book-msg { display: none; margin-top: 12px; padding: 12px 14px; border-radius: 8px; background: var(--accent-light, #eef4ff); color: var(--text); font-size: 14px; }
+.book-msg.err { background: #fdecec; }
+@media (max-width: 640px) { .book-grid { grid-template-columns: 1fr; } }
 @media (max-width: 640px) { .page { padding: 88px 1.25rem 3rem; } .page h1 { font-size: 27px; } .facts th { width: 40%; } .list .hide-sm { display: none; } }
 `;
 write("assets/site.css", mainCss + "\n" + pageCss);
@@ -261,9 +274,12 @@ for (const f of fs.readdirSync(ROOT)) {
   const spot = tools.find(t => t.featured === "spotlight" && isFeatured(t));
   const catFeatured = Object.fromEntries(cats.map(c => [c, byCat[c].filter(isFeatured).length]));
   const full = cats.filter(c => catFeatured[c] >= ADVERTISE.categorySlots);
-  const buy = (o, label) => o.url
-    ? `<a class="visit-btn" href="${esc(o.url)}" target="_blank" rel="noopener">${label}</a>`
-    : `<a class="visit-btn" href="mailto:hello@ellnow.com?subject=${encodeURIComponent(o.name + " on Ellnow")}">Email to book</a>`;
+  const buy = (o, label) => `<a class="visit-btn" href="#book" onclick="pickPlan('${o === ADVERTISE.spotlight ? "spotlight" : "category"}')">${label}</a>`;
+  const catOpts = cats.map(c => `<option value="${esc(c)}"${catFeatured[c] >= ADVERTISE.categorySlots ? " disabled" : ""}>${esc(c)}${catFeatured[c] >= ADVERTISE.categorySlots ? " (full)" : ""}</option>`).join("");
+  const bookCfg = JSON.stringify({
+    spotlight: { label: `${ADVERTISE.spotlight.name} ($${ADVERTISE.spotlight.price})`, url: ADVERTISE.spotlight.url, booked: !!spot },
+    category: { label: `${ADVERTISE.category.name} ($${ADVERTISE.category.price})`, url: ADVERTISE.category.url, booked: false },
+  });
   const body = `<div class="crumbs"><a href="/">Ellnow</a> › Advertise</div>
 <h1>Advertise on Ellnow</h1>
 <p class="lead">Put your AI tool in front of people who are choosing one. Every paid placement is labeled "Featured" and runs for 30 days. Paying never changes a tool's score.</p>
@@ -302,10 +318,82 @@ for (const f of fs.readdirSync(ROOT)) {
     <a class="visit-btn" href="/#submit">Submit a tool</a>
   </div>
 </div>
+<section class="book" id="book">
+  <h2>Book a placement</h2>
+  <p class="note" style="margin-top:0">Tell us which tool and placement you want. We'll confirm the start date by email${ADVERTISE.spotlight.url || ADVERTISE.category.url ? ". After you submit, you'll go to secure checkout" : " and send you a secure payment link. Nothing is charged until then"}.</p>
+  <div class="book-grid">
+    <label class="full">Placement
+      <select id="bPlan" onchange="pickPlan(this.value)">
+        <option value="spotlight">${ADVERTISE.spotlight.name}: $${ADVERTISE.spotlight.price} / 30 days${spot ? " (booked, join the waitlist)" : ""}</option>
+        <option value="category">${ADVERTISE.category.name}: $${ADVERTISE.category.price} / 30 days</option>
+      </select>
+    </label>
+    <label>Tool name<input type="text" id="bName" autocomplete="organization" /></label>
+    <label>Tool website<input type="url" id="bUrl" placeholder="https://" /></label>
+    <label id="bCatWrap" hidden>Category<select id="bCat"><option value="">Choose a category</option>${catOpts}</select></label>
+    <label>Preferred start date<input type="date" id="bStart" /></label>
+    <label>Your email<input type="email" id="bEmail" autocomplete="email" /></label>
+    <label class="full">Anything else? (optional)<textarea id="bNotes" placeholder="For example: tool isn't listed yet, or a campaign you want to line up with"></textarea></label>
+    <input type="text" id="bCompany" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" />
+  </div>
+  <button id="bBtn" onclick="bookPlacement()">Request booking →</button>
+  <div class="book-msg" id="bMsg" role="status"></div>
+  <p class="note">By booking, you agree to the <a href="/terms">Listing Terms</a>. See <a href="/terms#not-accepted">what we don't accept</a>.</p>
+</section>
+<script>
+const BOOK = ${bookCfg};
+const BOOK_LOADED_AT = Date.now();
+function pickPlan(p) {
+  document.getElementById("bPlan").value = p;
+  document.getElementById("bCatWrap").hidden = p !== "category";
+}
+function bookMsg(text, err) {
+  const m = document.getElementById("bMsg");
+  m.textContent = text; m.className = "book-msg" + (err ? " err" : ""); m.style.display = "block";
+}
+async function bookPlacement() {
+  const v = id => document.getElementById(id).value.trim();
+  const plan = v("bPlan");
+  if (document.getElementById("bCompany").value || Date.now() - BOOK_LOADED_AT < 4000) { bookMsg("✓ Request received! We'll email you to confirm your start date."); return; }
+  if (!v("bName") || !v("bUrl") || !v("bEmail")) { bookMsg("Please fill in the tool name, website and your email.", true); return; }
+  if (!/^\\S+@\\S+\\.\\S+$/.test(v("bEmail"))) { bookMsg("Please enter a valid email address.", true); return; }
+  if (plan === "category" && !v("bCat")) { bookMsg("Please choose a category.", true); return; }
+  const btn = document.getElementById("bBtn");
+  btn.disabled = true; btn.textContent = "Sending…";
+  try {
+    const res = await fetch("https://forminit.com/f/nbcomhc4z98", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({ blocks: [
+        { type: "sender", properties: { email: v("bEmail") } },
+        { type: "text", name: "listing_type", value: "featured: " + BOOK[plan].label },
+        { type: "text", name: "tool_name", value: v("bName") },
+        { type: "text", name: "tool_url", value: v("bUrl") },
+        { type: "text", name: "category", value: plan === "category" ? v("bCat") : "(homepage spotlight)" },
+        { type: "text", name: "start_date", value: v("bStart") || "as soon as possible" },
+        { type: "text", name: "description", value: v("bNotes") || "-" }
+      ] })
+    });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || "Something went wrong. Please try again, or email hello@ellnow.com."); }
+    ["bName","bUrl","bStart","bEmail","bNotes"].forEach(id => document.getElementById(id).value = "");
+    if (BOOK[plan].url && !BOOK[plan].booked) {
+      bookMsg("✓ Request received! Taking you to secure checkout…");
+      setTimeout(() => { window.location.href = BOOK[plan].url; }, 1500);
+    } else {
+      bookMsg("✓ Request received! We'll check your tool and email you within 2 business days with your start date and a secure payment link.");
+    }
+  } catch (e) {
+    bookMsg(e.message && e.message !== "Failed to fetch" ? e.message : "Network error. Please check your connection and try again.", true);
+  } finally {
+    btn.disabled = false; btn.textContent = "Request booking →";
+  }
+}
+if (location.hash === "#book-category") { pickPlan("category"); document.getElementById("book").scrollIntoView(); }
+</script>
 <h2>How it works</h2>
 <ul class="lead">
   <li>Your tool needs to be listed on Ellnow, or approved through Fast-track, before a placement starts.</li>
-  <li>After you pay, we confirm the start date by email. The placement runs for 30 days and then ends on its own. There's no subscription.</li>
+  <li>Book with the form above. We confirm the start date by email, then you pay. The placement runs for 30 days and then ends on its own. There's no subscription.</li>
   <li>Featured links are marked as sponsored, as search engines require for paid links.</li>
   <li>We don't sell placements to tools on our <a href="/terms#not-accepted">not-accepted list</a>. If we can't run your placement, you get a full refund.</li>
 </ul>
