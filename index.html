@@ -326,6 +326,13 @@
 .plan-policy a{color:rgba(255,255,255,.75);text-decoration:underline}
 @media (max-width:640px){.plans{grid-template-columns:1fr}}
 </style>
+<style>
+.tool-card.is-featured{position:relative;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)}
+.feat-badge{position:absolute;top:10px;right:10px;font-size:10.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:var(--accent);color:#fff;padding:2px 8px;border-radius:999px}
+.spotlight{margin:0 0 1.5rem}
+.spotlight .tool-card{max-width:560px}
+.spotlight-label{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:.5rem}
+</style>
 </head>
 <body>
 
@@ -344,6 +351,7 @@
   </a>
   <div class="nav-links">
     <a href="#tools">Browse</a>
+    <a href="/advertise">Advertise</a>
     <a href="#submit" class="nav-cta">Submit a Tool</a>
   </div>
 </nav>
@@ -372,6 +380,7 @@
 
 <section class="section" id="tools">
   <div class="section-title">Browse all tools</div>
+  <div class="spotlight" id="spotlight" hidden></div>
   <div class="cats-row" id="catsRow"></div>
   <div class="filter-bar">
     <div class="result-label" id="resultLabel"></div>
@@ -627,7 +636,7 @@
         <span class="plan-desc">Reviewed within 48 hours. Full refund if not approved.</span>
       </label>
     </div>
-    <p class="plan-policy">We list AI tools people can sign up for and use. One listing per product. Paying speeds up review; it doesn't guarantee approval or change a tool's score. By submitting, you agree to the <a href="/terms" target="_blank" rel="noopener">Listing Terms</a>.</p>
+    <p class="plan-policy">We list AI tools people can sign up for and use. One listing per product. Paying speeds up review; it doesn't guarantee approval or change a tool's score. See <a href="/terms#not-accepted" target="_blank" rel="noopener">what we don't accept</a>. By submitting, you agree to the <a href="/terms" target="_blank" rel="noopener">Listing Terms</a>.</p>
     <div class="form">
       <div class="form-row">
         <input type="text" id="fName" placeholder="Tool name" />
@@ -701,6 +710,7 @@
     <a href="#" onclick="document.getElementById('aboutModal').classList.add('open'); return false;">About</a>
     <a href="#submit">Submit a Tool</a>
     <a href="#" onclick="document.getElementById('newsletterModal').classList.add('open'); return false;">Newsletter</a>
+    <a href="/advertise">Advertise</a>
     <a href="/terms">Terms</a>
   </div>
   <p>© 2025 Ellnow · Find the right AI tool, right now.</p>
@@ -1239,13 +1249,45 @@ function toolMatchesSearch(t, terms) {
   return terms.some(term => term && term.length > 1 && haystack.includes(term));
 }
 
+// Paid placements. A tool is featured while today is on or before its featuredUntil date (YYYY-MM-DD).
+// featured: "spotlight" = homepage spotlight + top of its category; "category" = top of its category.
+function todayStr() { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+function isFeatured(t) { return !!t.featured && (!t.featuredUntil || t.featuredUntil >= todayStr()); }
+function cardHTML(t, i) {
+  const f = isFeatured(t);
+  return `
+    <a class="tool-card${f ? " is-featured" : ""}" href="${t.url}" target="_blank" rel="${f ? "sponsored noopener" : "noopener"}" style="animation-delay:${Math.min(i * 0.03, 0.5)}s">
+      ${f ? '<span class="feat-badge">Featured</span>' : ""}
+      <div class="tool-top">
+        <div class="tool-icon">${t.icon}</div>
+        <div><div class="tool-name">${t.name}</div><div class="tool-cat">${t.cat}</div></div>
+      </div>
+      <div class="tool-desc">${t.desc}</div>
+      <div class="tool-foot">
+        <span class="tbadge ${t.pricing}">${t.pricing}</span>
+        <span class="tool-rating"><span class="star">★</span> ${t.rating}</span>
+        <span class="visit">Visit →</span>
+      </div>
+    </a>`;
+}
+function renderSpotlight() {
+  const el = document.getElementById("spotlight");
+  if (!el) return;
+  const t = tools.find(x => x.featured === "spotlight" && isFeatured(x));
+  if (!t) { el.hidden = true; el.innerHTML = ""; return; }
+  el.hidden = false;
+  el.innerHTML = '<div class="spotlight-label">Spotlight</div>' + cardHTML(t, 0);
+}
+
 function getFiltered() {
-  return tools.filter(t => {
+  const list = tools.filter(t => {
     const mc = activeCat === "All" || t.cat === activeCat;
     const mp = activePrice === "all" || t.pricing === activePrice;
     const ms = !q.trim() || toolMatchesSearch(t, getSearchTerms(q));
     return mc && mp && ms;
   });
+  if (activeCat === "All") return list;
+  return list.filter(isFeatured).concat(list.filter(t => !isFeatured(t)));
 }
 
 function catCount(c) { return c === "All" ? tools.length : tools.filter(t => t.cat === c).length; }
@@ -1267,6 +1309,7 @@ function setPrice(el, v) {
 }
 
 function renderTools() {
+  renderSpotlight();
   const f = getFiltered();
   document.getElementById("resultLabel").innerHTML = `Showing <strong>${f.length}</strong> of <strong>${tools.length}</strong> tools`;
   document.getElementById("totalCount").textContent = tools.length;
@@ -1275,19 +1318,7 @@ function renderTools() {
     grid.innerHTML = `<div class="no-results"><h3>No tools found</h3><p>Try a different search term or category.</p></div>`;
     return;
   }
-  grid.innerHTML = f.map((t, i) => `
-    <a class="tool-card" href="${t.url}" target="_blank" rel="noopener" style="animation-delay:${Math.min(i * 0.03, 0.5)}s">
-      <div class="tool-top">
-        <div class="tool-icon">${t.icon}</div>
-        <div><div class="tool-name">${t.name}</div><div class="tool-cat">${t.cat}</div></div>
-      </div>
-      <div class="tool-desc">${t.desc}</div>
-      <div class="tool-foot">
-        <span class="tbadge ${t.pricing}">${t.pricing}</span>
-        <span class="tool-rating"><span class="star">★</span> ${t.rating}</span>
-        <span class="visit">Visit →</span>
-      </div>
-    </a>`).join("");
+  grid.innerHTML = f.map((t, i) => cardHTML(t, i)).join("");
 }
 
 function renderTicker() {
