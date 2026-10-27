@@ -189,6 +189,7 @@
     .form textarea { resize: vertical; min-height: 90px; }
     .form-btn { background: #fff; color: var(--text); border: none; border-radius: 10px; padding: 14px; font-family: var(--font-sans); font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
     .form-btn:hover { opacity: 0.88; }
+    .form-err { display: none; background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.3); border-radius: 10px; padding: .85rem 1rem; color: #fca5a5; font-size: 14px; }
     .success-msg { display: none; background: rgba(67,232,176,0.12); border: 1px solid rgba(67,232,176,0.25); border-radius: 10px; padding: 1rem; color: #6ee7b7; font-size: 14px; }
 
     footer { border-top: 1px solid var(--border); padding: 2rem 2.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
@@ -636,11 +637,11 @@
         <span class="plan-desc">Reviewed within 48 hours. Full refund if not approved.</span>
       </label>
     </div>
-    <p class="plan-policy">We list AI tools people can sign up for and use. One listing per product. Paying speeds up review; it doesn't guarantee approval or change a tool's score. See <a href="/terms#not-accepted" target="_blank" rel="noopener">what we don't accept</a>. By submitting, you agree to the <a href="/terms" target="_blank" rel="noopener">Listing Terms</a>.</p>
+    <p class="plan-policy">We list AI tools people can sign up for and use. One listing per product. Paying speeds up review; it doesn't guarantee approval or change a tool's score. Please submit your tool's homepage. Listing links are nofollow, so they don't pass SEO value. See <a href="/terms#not-accepted" target="_blank" rel="noopener">what we don't accept</a>. By submitting, you agree to the <a href="/terms" target="_blank" rel="noopener">Listing Terms</a>.</p>
     <div class="form">
       <div class="form-row">
         <input type="text" id="fName" placeholder="Tool name" />
-        <input type="url" id="fUrl" placeholder="Website URL" />
+        <input type="url" id="fUrl" placeholder="Homepage URL (https://yourtool.com)" />
       </div>
       <select id="fCat">
         <option value="" disabled selected>Select category</option>
@@ -662,6 +663,7 @@
       <textarea id="fDesc" placeholder="What does your tool do? (1–2 sentences)"></textarea>
       <input type="text" id="fCompany" name="company_site" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" />
       <button class="form-btn" onclick="submitTool()">Submit for free review →</button>
+      <div class="form-err" id="formErr" role="alert"></div>
       <div class="success-msg" id="successMsg">✓ Received! We'll email you once your tool is reviewed.</div>
     </div>
   </div>
@@ -1256,7 +1258,7 @@ function isFeatured(t) { return !!t.featured && (!t.featuredUntil || t.featuredU
 function cardHTML(t, i) {
   const f = isFeatured(t);
   return `
-    <a class="tool-card${f ? " is-featured" : ""}" href="${t.url}" target="_blank" rel="${f ? "sponsored noopener" : "noopener"}" style="animation-delay:${Math.min(i * 0.03, 0.5)}s">
+    <a class="tool-card${f ? " is-featured" : ""}" href="${t.url}" target="_blank" rel="${f ? "sponsored noopener" : "nofollow noopener"}" style="animation-delay:${Math.min(i * 0.03, 0.5)}s">
       ${f ? '<span class="feat-badge">Featured</span>' : ""}
       <div class="tool-top">
         <div class="tool-icon">${t.icon}</div>
@@ -1386,7 +1388,27 @@ function looksLikeBot() {
   return (trap && trap.value.trim() !== "") || (Date.now() - FORM_LOADED_AT < 4000);
 }
 
+// Submission rules: real reply address, homepage only, no repeat within a day (per browser).
+const BLOCKED_EMAIL_DOMAINS = ["grokbot.com", "agentmail.to", "mailinator.com", "guerrillamail.com", "sharklasers.com", "10minutemail.com", "temp-mail.org", "tempmail.com", "yopmail.com", "trashmail.com", "getnada.com", "dispostable.com", "maildrop.cc", "throwawaymail.com", "fakeinbox.com", "emailondeck.com", "mohmal.com"];
+function showFormErr(msg) {
+  const e = document.getElementById("formErr");
+  e.textContent = msg; e.style.display = msg ? "block" : "none";
+}
+function checkSubmission(url, email) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "Please enter a valid email address." };
+  const domain = email.split("@")[1].toLowerCase();
+  if (BLOCKED_EMAIL_DOMAINS.some(d => domain === d || domain.endsWith("." + d))) return { error: "Please use an email address we can reply to, such as your work email." };
+  let u;
+  try { u = new URL(/^https?:\/\//i.test(url) ? url : "https://" + url); } catch (e) { return { error: "Please enter a valid website address, like https://yourtool.com" }; }
+  if (!/^https?:$/.test(u.protocol) || !u.hostname.includes(".")) return { error: "Please enter a valid website address, like https://yourtool.com" };
+  if (u.search || u.hash || u.pathname !== "/") return { error: "Please enter your tool's homepage only, like https://" + u.hostname + " (no subpages or tracking tags)." };
+  const key = "ellnow_sub_" + u.hostname.replace(/^www\./, "");
+  try { const t = Number(localStorage.getItem(key)); if (t && Date.now() - t < 86400000) return { error: "We already received this tool. We'll email you once it's reviewed." }; } catch (e) {}
+  return { url: u.origin, key };
+}
+
 async function submitTool() {
+  showFormErr("");
   if (looksLikeBot()) {
     const m = document.getElementById("successMsg");
     m.textContent = "✓ Received! We'll email you once your tool is reviewed.";
@@ -1395,7 +1417,10 @@ async function submitTool() {
   }
   const ids = ["fName","fUrl","fCat","fPrice","fEmail","fDesc"];
   const values = ids.map(id => document.getElementById(id).value.trim());
-  if (values.some(v => !v)) { alert("Please fill in all fields."); return; }
+  if (values.some(v => !v)) { showFormErr("Please fill in all fields."); return; }
+  const check = checkSubmission(values[1], values[4]);
+  if (check.error) { showFormErr(check.error); return; }
+  values[1] = check.url;
 
   const btn = document.querySelector(".form-btn");
   btn.textContent = "Submitting...";
@@ -1428,6 +1453,7 @@ async function submitTool() {
     });
 
     if (res.ok) {
+      try { localStorage.setItem(check.key, String(Date.now())); } catch (e) {}
       const msg = document.getElementById("successMsg");
       if (plan === "fasttrack") {
         msg.textContent = FASTTRACK_PAYMENT_URL
