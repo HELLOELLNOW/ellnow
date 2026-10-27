@@ -49,7 +49,8 @@ const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(
 const slug = s => String(s).toLowerCase().replace(/&/g, " and ").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const isAffiliate = url => { try { return Object.hasOwn(AFFILIATE_HOSTS, new URL(url).hostname); } catch { return false; } };
 const isFeatured = t => !!t.featured && (!t.featuredUntil || t.featuredUntil >= TODAY);
-const rel = (url, t) => (isAffiliate(url) || (t && isFeatured(t))) ? "sponsored noopener" : "noopener";
+// Paid and affiliate links are sponsored; every other listing link is nofollow (removes the backlink incentive for spam submissions).
+const rel = (url, t) => (isAffiliate(url) || (t && isFeatured(t))) ? "sponsored noopener" : "nofollow noopener";
 const byRating = (a, b) => b.rating - a.rating;
 const displayHost = url => { const h = new URL(url).hostname; return AFFILIATE_HOSTS[h] || h.replace(/^www\./, ""); };
 const score = r => Number(r).toFixed(1);
