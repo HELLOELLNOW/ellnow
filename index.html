@@ -238,6 +238,16 @@
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', 'G-792GYSG59K');
+  // Outbound clicks (tool cards, Visit buttons, affiliate links) as a "tool_click" event, so each tool's clicks show in Analytics.
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[href]');
+    if (!a || !/^https?:$/.test(a.protocol) || a.hostname.replace(/^www\./, '') === location.hostname.replace(/^www\./, '')) return;
+    var card = a.closest('.tool-card');
+    var nameEl = card && card.querySelector('.tool-name');
+    var name = nameEl ? nameEl.textContent : (a.textContent || '').replace(/^\s*Visit\s+/, '').replace(/\s*→\s*$/, '');
+    var placement = card ? (card.classList.contains('is-featured') ? 'featured_card' : 'card') : (a.classList.contains('visit-btn') ? 'tool_page' : 'other');
+    gtag('event', 'tool_click', { tool_name: name.trim().slice(0, 100), link_domain: a.hostname, link_url: a.href.slice(0, 300), placement: placement });
+  }, true);
 </script>
 <script type="application/ld+json">
 {
