@@ -7,6 +7,61 @@
       "source": "/submit",
       "destination": "/#submit",
       "permanent": true
+    },
+    {
+      "source": "/tools/descript-overdub",
+      "destination": "/tools/descript",
+      "permanent": true
+    },
+    {
+      "source": "/tools/canva-presentations",
+      "destination": "/tools/canva-ai",
+      "permanent": true
+    },
+    {
+      "source": "/tools/kling-image",
+      "destination": "/tools/kling-ai",
+      "permanent": true
+    },
+    {
+      "source": "/tools/gemini-imagen",
+      "destination": "/tools/gemini",
+      "permanent": true
+    },
+    {
+      "source": "/tools/copy-ai-workflows",
+      "destination": "/tools/copy-ai",
+      "permanent": true
+    },
+    {
+      "source": "/tools/jasper-campaigns",
+      "destination": "/tools/jasper",
+      "permanent": true
+    },
+    {
+      "source": "/tools/otter-ai-for-education",
+      "destination": "/tools/otter-ai",
+      "permanent": true
+    },
+    {
+      "source": "/tools/cursor-3",
+      "destination": "/tools/cursor",
+      "permanent": true
+    },
+    {
+      "source": "/tools/grok-aurora",
+      "destination": "/tools/grok",
+      "permanent": true
+    },
+    {
+      "source": "/tools/nano-banana",
+      "destination": "/tools/gemini",
+      "permanent": true
+    },
+    {
+      "source": "/tools/perplexity-pro",
+      "destination": "/tools/perplexity",
+      "permanent": true
     }
   ],
   "headers": [
