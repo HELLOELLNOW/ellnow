@@ -136,7 +136,12 @@ const shell = ({ title, description, canonical, body, jsonld }) => `<!DOCTYPE ht
   <meta property="og:title" content="${esc(title)}" />
   <meta property="og:description" content="${esc(description)}" />
   <meta property="og:site_name" content="Ellnow" />
-  <meta name="twitter:card" content="summary" />
+  <meta property="og:image" content="${SITE}/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Ellnow: find the right AI tool, right now" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="${SITE}/og-image.png" />
   <link rel="stylesheet" href="/assets/site.css" />
   ${analytics}
   ${jsonld.map(j => `<script type="application/ld+json">${JSON.stringify(j)}</script>`).join("\n  ")}
@@ -174,6 +179,7 @@ const crumbsLd = items => ({
   "@context": "https://schema.org", "@type": "BreadcrumbList",
   itemListElement: items.map(([name, url], i) => ({ "@type": "ListItem", position: i + 1, name, item: url }))
 });
+const HEALTH_NOTE = `<p class="note">Health and wellness tools are for general information only. They are not medical advice. Talk to a qualified health professional about your own situation.</p>`;
 const catChips = current => `<div class="chips">${cats.filter(c => c !== current).map(c => `<a href="/category/${slug(c)}">${esc(c)} (${byCat[c].length})</a>`).join("")}</div>`;
 
 // ---------- tool pages ----------
@@ -193,6 +199,7 @@ for (const t of tools) {
 </table>
 <a class="visit-btn" href="${esc(t.url)}" target="_blank" rel="${rel(t.url, t)}">Visit ${esc(t.name)} →</a>
 ${aff ? `<p class="note">Ellnow may earn a commission if you sign up through this link. It doesn't change the listing or score.</p>` : ""}
+${t.cat === "Health" ? HEALTH_NOTE : ""}
 ${isFeatured(t) ? `<p class="note">This is a paid Featured placement. It doesn't change the tool's score.</p>` : ""}
 ${alts.length ? `<h2>Alternatives to ${esc(t.name)}</h2>
 <table class="list">
@@ -229,6 +236,7 @@ for (const c of cats) {
   <tr><th>Tool</th><th class="hide-sm">What it does</th><th>Pricing</th><th>Score</th></tr>
 ${list.map(t => `  <tr><td><a href="/tools/${t.slug}">${esc(t.name)}</a>${isFeatured(t) ? '<span class="feat-pill">Featured</span>' : ""}</td><td class="hide-sm">${esc(t.desc)}</td><td>${pricingText(t.pricing)}</td><td>${score(t.rating)}</td></tr>`).join("\n")}
 </table>
+${c === "Health" ? HEALTH_NOTE : ""}
 <h2>Other categories</h2>
 ${catChips(c)}`;
   write(`category/${s}.html`, shell({
@@ -260,6 +268,10 @@ const faqTag = '<section class="section faq" id="faq">';
 if (!home.includes(faqTag)) throw new Error("FAQ section not found in index.html");
 home = home.replace(faqTag, catSection + faqTag);
 home = home.replace("</head>", `<style>${pageCss.match(/\.chips[\s\S]*?\.cat-links[^}]*}/)[0]}</style>\n</head>`);
+home = home.replace(/(<strong id="totalCount">)[^<]*(<\/strong>)/, `$1${tools.length}$2`)
+  .replace(/(<strong id="catCount">)[^<]*(<\/strong>)/, `$1${cats.length}$2`)
+  .replace("<!-- TICKER -->", () => { const top = [...tools].sort(byRating).slice(0, 10); return [...top, ...top].map(t => `<div class="ticker-item"><span>${t.icon}</span>${esc(t.name)}</div>`).join(""); })
+  .replace(/© \d{4} Ellnow/, `© ${YEAR} Ellnow`);
 write("index.html", home);
 
 // ---------- copy other root files ----------
