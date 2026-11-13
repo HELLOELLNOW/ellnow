@@ -80,6 +80,7 @@ const pageCss = `
 .crumbs a { color: var(--text2); text-decoration: none; }
 .crumbs a:hover { color: var(--accent); }
 .page h1 { font-family: var(--font-serif); font-weight: 400; font-size: 34px; letter-spacing: -0.5px; line-height: 1.15; margin-bottom: .9rem; }
+.page h3 { font-size: 16px; font-weight: 600; margin: 1.25rem 0 .4rem; }
 .page h2 { font-family: var(--font-serif); font-weight: 400; font-size: 22px; margin: 2.25rem 0 .9rem; }
 .lead { font-size: 16px; line-height: 1.65; color: var(--text); margin-bottom: 1.25rem; }
 .facts { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; font-size: 14px; }
@@ -221,6 +222,35 @@ ${catChips(t.cat)}`;
   }));
 }
 
+// ---------- guides ("best X for Y" pages) ----------
+// Each guide is built from the tools array, so scores, pricing and links stay in sync.
+// groups: tool names picked for each need (all must exist in the tools array).
+const GUIDES = [
+  {
+    slug: "best-ai-writing-tools",
+    cat: "Writing",
+    exclude: ["Talkpal AI"],
+    h1: `Best AI writing tools in ${YEAR}`,
+    lead: n => `There's no single best AI writing tool, because "writing" covers very different jobs: polishing grammar, drafting marketing copy, producing long articles, writing fiction. This guide compares ${n} tools Ellnow lists, grouped by the job you need done, with each tool's pricing model and editor's score.`,
+    groups: [
+      { h: "Best for grammar, clarity and editing", names: ["Grammarly", "ProWritingAid", "Hemingway Editor"], why: "These check and improve text you've already written rather than drafting it for you. Grammarly has the highest editor's score of the writing tools here." },
+      { h: "Best for marketing copy and ads", names: ["Jasper", "Copy.ai", "Anyword"], why: "Built for marketing teams who need ad copy, emails and product descriptions quickly. Anyword adds performance scores so you can compare versions of copy before publishing." },
+      { h: "Best for long-form articles and SEO content", names: ["Writesonic", "Longshot AI"], why: "Aimed at blog posts and articles. Longshot AI pulls in real-time web search to fact-check what it writes." },
+      { h: "Best for fiction and novels", names: ["Sudowrite", "Scrivener AI", "FicWeave"], why: "Made for storytellers. Sudowrite is a writing partner for novelists, Scrivener AI is a long-form writing environment, and FicWeave drafts fanfiction chapters while keeping characters and facts consistent." },
+      { h: "Best for rewriting and paraphrasing", names: ["QuillBot", "Wordtune", "AI21 Wordspice"], why: "Take a sentence or paragraph you have and offer better ways to say it. AI21 Wordspice focuses on keeping your own voice." },
+      { h: "Best for writing inside your documents", names: ["Notion AI", "Lex", "HyperWrite"], why: "Writing help where you already work. Notion AI lives inside Notion, Lex gives suggestions as you type, and HyperWrite learns your style over time." },
+      { h: "Best on a budget", names: ["Rytr", "QuillBot", "Grammarly"], why: "Rytr is described as an affordable assistant for blogs, emails and social posts, and QuillBot and Grammarly both have a free plan." },
+    ],
+    faq: (list, free) => [
+      ["What is the best AI writing tool?", `It depends on the job. Among the ${list.length} tools Ellnow compares here, ${list.slice().sort(byRating)[0].name} has the highest editor's score (${score(list.slice().sort(byRating)[0].rating)} / 5). For grammar and editing that's usually the first stop; for marketing copy, look at Jasper, Copy.ai or Anyword; for fiction, Sudowrite.`],
+      ["Are there free AI writing tools?", `Yes. ${free.length} of the ${list.length} tools listed here are free or have a free plan, including ${listJoin(free.slice().sort(byRating).slice(0, 4).map(t => t.name))}. Free plans usually limit usage, so check each tool's own site for current limits.`],
+      ["Can AI writing tools replace a human writer?", "They speed up drafting and editing, but their output still needs a person to check facts, tone and originality. Treat them as an assistant, not a replacement."],
+      ["How are the scores on this page decided?", "They're Ellnow's own editor's scores out of 5, not user reviews. Paid placements and affiliate links never change a score."],
+    ],
+  },
+];
+const GUIDES_BY_CAT = Object.fromEntries(GUIDES.map(g => [g.cat, g]));
+
 // ---------- category pages ----------
 for (const c of cats) {
   const list = byCat[c];
@@ -237,6 +267,7 @@ for (const c of cats) {
 ${list.map(t => `  <tr><td><a href="/tools/${t.slug}">${esc(t.name)}</a>${isFeatured(t) ? '<span class="feat-pill">Featured</span>' : ""}</td><td class="hide-sm">${esc(t.desc)}</td><td>${pricingText(t.pricing)}</td><td>${score(t.rating)}</td></tr>`).join("\n")}
 </table>
 ${c === "Health" ? HEALTH_NOTE : ""}
+${GUIDES_BY_CAT[c] ? `<p class="note">Not sure which to pick? Read our guide: <a href="/${GUIDES_BY_CAT[c].slug}">${esc(GUIDES_BY_CAT[c].h1)}</a>.</p>` : ""}
 <h2>Other categories</h2>
 ${catChips(c)}`;
   write(`category/${s}.html`, shell({
@@ -259,7 +290,9 @@ const sm = /<!-- STATIC-TOOLS:START[^>]*-->\n[\s\S]*?\n<!-- STATIC-TOOLS:END -->
 if (!sm.test(home)) throw new Error("STATIC-TOOLS markers not found in index.html");
 home = home.replace(sm, m => m.split("\n")[0] + "\n" + cards + "\n<!-- STATIC-TOOLS:END -->");
 const catSection = `<section class="cat-links" id="categories">
-  <div class="section-title">Browse by category</div>
+  <div class="section-title">Guides</div>
+  <div class="chips">${GUIDES.map(g => `<a href="/${g.slug}">${esc(g.h1)}</a>`).join("")}</div>
+  <div class="section-title" style="margin-top:1.25rem">Browse by category</div>
   <div class="chips">${cats.map(c => `<a href="/category/${slug(c)}">${esc(c)} (${byCat[c].length})</a>`).join("")}</div>
 </section>
 
@@ -414,8 +447,49 @@ if (location.hash === "#book-category") { pickPlan("category"); document.getElem
   write("advertise.html", shell({ title: "Advertise on Ellnow | Featured AI tool placements", description: `Feature your AI tool on Ellnow: Homepage Spotlight $${ADVERTISE.spotlight.price} or Category Featured $${ADVERTISE.category.price} for 30 days, clearly labeled.`, canonical: `${SITE}/advertise`, body, jsonld: [crumbsLd([["Ellnow", SITE + "/"], ["Advertise", SITE + "/advertise"]])] }));
 }
 
+const guideUrl = g => `${SITE}/${g.slug}`;
+for (const g of GUIDES) {
+  const list = byCat[g.cat].filter(t => !(g.exclude || []).includes(t.name));
+  const byName = Object.fromEntries(list.map(t => [t.name, t]));
+  for (const grp of g.groups) for (const n of grp.names) if (!byName[n]) throw new Error(`guide ${g.slug}: tool "${n}" not found in ${g.cat}`);
+  const free = list.filter(t => t.pricing !== "paid");
+  const faq = g.faq(list, free);
+  const body = `<div class="crumbs"><a href="/">Ellnow</a> › ${esc(g.h1)}</div>
+<h1>${esc(g.h1)}</h1>
+<p class="lead">${esc(g.lead(list.length))}</p>
+<p class="note">Scores are Ellnow's editor's scores out of 5, not user reviews. Pricing is as listed by Ellnow, so confirm current prices on each tool's site. Some links may be affiliate links; see our <a href="/terms#scores">Terms</a>.</p>
+${g.groups.map(grp => `<h2>${esc(grp.h)}</h2>
+<p>${esc(grp.why)}</p>
+<table class="list">
+  <tr><th>Tool</th><th class="hide-sm">What it does</th><th>Pricing</th><th>Score</th></tr>
+${grp.names.map(n => byName[n]).map(t => `  <tr><td><a href="/tools/${t.slug}">${esc(t.name)}</a></td><td class="hide-sm">${esc(t.desc)}</td><td>${pricingText(t.pricing)}</td><td>${score(t.rating)}</td></tr>`).join("\n")}
+</table>`).join("\n")}
+<h2>All ${list.length} AI writing tools compared</h2>
+<table class="list">
+  <tr><th>Tool</th><th class="hide-sm">What it does</th><th>Pricing</th><th>Score</th></tr>
+${[...list].sort(byRating).map(t => `  <tr><td><a href="/tools/${t.slug}">${esc(t.name)}</a>${isFeatured(t) ? '<span class="feat-pill">Featured</span>' : ""}</td><td class="hide-sm">${esc(t.desc)}</td><td>${pricingText(t.pricing)}</td><td>${score(t.rating)}</td></tr>`).join("\n")}
+</table>
+<h2>Frequently asked questions</h2>
+${faq.map(([q, a]) => `<h3>${esc(q)}</h3>\n<p>${esc(a)}</p>`).join("\n")}
+<p class="note">See every tool in the <a href="/category/${slug(g.cat)}">${esc(catTitle(g.cat))}</a> category, or browse <a href="/">all ${tools.length} AI tools</a>.</p>
+<h2>More categories</h2>
+${catChips(g.cat)}`;
+  write(`${g.slug}.html`, shell({
+    title: `${g.h1}: ${list.length} tools compared | Ellnow`,
+    description: `Compare ${list.length} AI writing tools by what you need: editing, marketing copy, long-form articles, fiction and rewriting. Pricing and editor's scores included.`,
+    canonical: guideUrl(g),
+    body,
+    jsonld: [
+      { "@context": "https://schema.org", "@type": "ItemList", name: g.h1, numberOfItems: list.length,
+        itemListElement: [...list].sort(byRating).map((t, i) => ({ "@type": "ListItem", position: i + 1, url: `${SITE}/tools/${t.slug}`, name: t.name })) },
+      { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) },
+      crumbsLd([["Ellnow", SITE + "/"], [g.h1, guideUrl(g)]])
+    ]
+  }));
+}
+
 // ---------- sitemap ----------
-const urls = [[SITE + "/", "1.0"], [SITE + "/advertise", "0.5"], ...cats.map(c => [`${SITE}/category/${slug(c)}`, "0.8"]), ...tools.map(t => [`${SITE}/tools/${t.slug}`, "0.6"])];
+const urls = [[SITE + "/", "1.0"], [SITE + "/advertise", "0.5"], ...GUIDES.map(g => [guideUrl(g), "0.9"]), ...cats.map(c => [`${SITE}/category/${slug(c)}`, "0.8"]), ...tools.map(t => [`${SITE}/tools/${t.slug}`, "0.6"])];
 write("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map(([u, p]) => `  <url><loc>${u}</loc><lastmod>${TODAY}</lastmod><priority>${p}</priority></url>`).join("\n")}
@@ -434,6 +508,10 @@ Ellnow lists tools people can sign up for and use directly. Each product is list
 - [Ellnow home and full tool list](${SITE}/): all tools, searchable and filterable by category and pricing
 - [FAQ](${SITE}/#faq): answers to common questions, such as the best AI video, image, writing, coding and voice tools
 - [Submit a tool](${SITE}/#submit): how AI tool makers can request a listing
+
+## Guides
+
+${GUIDES.map(g => `- [${g.h1}](${guideUrl(g)}): ${g.cat} tools grouped by use case`).join("\n")}
 
 ## Categories
 

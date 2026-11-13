@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Advertise on Ellnow | Featured AI tool placements</title>
+  <meta name="description" content="Feature your AI tool on Ellnow: Homepage Spotlight $99 or Category Featured $39 for 30 days, clearly labeled." />
+  <link rel="canonical" href="https://www.ellnow.com/advertise" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.ellnow.com/advertise" />
+  <meta property="og:title" content="Advertise on Ellnow | Featured AI tool placements" />
+  <meta property="og:description" content="Feature your AI tool on Ellnow: Homepage Spotlight $99 or Category Featured $39 for 30 days, clearly labeled." />
+  <meta property="og:site_name" content="Ellnow" />
+  <meta property="og:image" content="https://www.ellnow.com/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Ellnow: find the right AI tool, right now" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://www.ellnow.com/og-image.png" />
+  <link rel="stylesheet" href="/assets/site.css" />
+  <!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-792GYSG59K"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-792GYSG59K');
+  // Outbound clicks (tool cards, Visit buttons, affiliate links) as a "tool_click" event, so each tool's clicks show in Analytics.
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[href]');
+    if (!a || !/^https?:$/.test(a.protocol) || a.hostname.replace(/^www\./, '') === location.hostname.replace(/^www\./, '')) return;
+    var card = a.closest('.tool-card');
+    var nameEl = card && card.querySelector('.tool-name');
+    var name = nameEl ? nameEl.textContent : (a.textContent || '').replace(/^\s*Visit\s+/, '').replace(/\s*→\s*$/, '');
+    var placement = card ? (card.classList.contains('is-featured') ? 'featured_card' : 'card') : (a.classList.contains('visit-btn') ? 'tool_page' : 'other');
+    gtag('event', 'tool_click', { tool_name: name.trim().slice(0, 100), link_domain: a.hostname, link_url: a.href.slice(0, 300), placement: placement });
+  }, true);
+</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Ellnow","item":"https://www.ellnow.com/"},{"@type":"ListItem","position":2,"name":"Advertise","item":"https://www.ellnow.com/advertise"}]}</script>
+</head>
+<body>
+<nav>
+  <a href="/" class="nav-logo">
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="32" height="32" rx="9" fill="#2563eb"/>
+      <circle cx="16" cy="16" r="6" fill="none" stroke="white" stroke-width="2"/>
+      <circle cx="16" cy="16" r="2" fill="white"/>
+      <line x1="16" y1="4" x2="16" y2="8" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      <line x1="16" y1="24" x2="16" y2="28" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      <line x1="4" y1="16" x2="8" y2="16" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      <line x1="24" y1="16" x2="28" y2="16" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <span class="nav-logo-text">ell<em>now</em></span>
+  </a>
+  <div class="nav-links">
+    <a href="/#tools">Browse</a>
+    <a href="/advertise">Advertise</a>
+    <a href="/#submit" class="nav-cta">Submit a Tool</a>
+  </div>
+</nav>
+<main class="page">
+<div class="crumbs"><a href="/">Ellnow</a> › Advertise</div>
+<h1>Advertise on Ellnow</h1>
+<p class="lead">Put your AI tool in front of people who are choosing one. Every paid placement is labeled "Featured" and runs for 30 days. Paying never changes a tool's score.</p>
+<div class="ad-grid">
+  <div class="ad-card">
+    <h3>Homepage Spotlight</h3>
+    <div class="ad-price">$99 <small>/ 30 days</small></div>
+    <ul>
+      <li>The one Spotlight slot at the top of the homepage tool list</li>
+      <li>Top spot and Featured badge in your category</li>
+      <li>Featured badge on your tool page</li>
+    </ul>
+    <p class="ad-status">Available now</p>
+    <a class="visit-btn" href="#book" onclick="pickPlan('spotlight')">Book Spotlight · $99</a>
+  </div>
+  <div class="ad-card">
+    <h3>Category Featured</h3>
+    <div class="ad-price">$39 <small>/ 30 days</small></div>
+    <ul>
+      <li>Top of your category page and category filter</li>
+      <li>Highlighted card with a Featured badge</li>
+      <li>Up to 3 tools per category</li>
+    </ul>
+    <p class="ad-status">Open in every category</p>
+    <a class="visit-btn" href="#book" onclick="pickPlan('category')">Book Category Featured · $39</a>
+  </div>
+  <div class="ad-card">
+    <h3>Fast-track review</h3>
+    <div class="ad-price">$19 <small>one-time</small></div>
+    <ul>
+      <li>Reviewed within 48 hours</li>
+      <li>Full refund if not approved</li>
+      <li>A permanent standard listing</li>
+    </ul>
+    <p class="ad-status">Not listed yet? Start here.</p>
+    <a class="visit-btn" href="/#submit">Submit a tool</a>
+  </div>
+</div>
+<section class="book" id="book">
+  <h2>Book a placement</h2>
+  <p class="note" style="margin-top:0">Tell us which tool and placement you want. We'll confirm the start date by email. After you submit, you'll go to secure checkout.</p>
+  <div class="book-grid">
+    <label class="full">Placement
+      <select id="bPlan" onchange="pickPlan(this.value)">
+        <option value="spotlight">Homepage Spotlight: $99 / 30 days</option>
+        <option value="category">Category Featured: $39 / 30 days</option>
+      </select>
+    </label>
+    <label>Tool name<input type="text" id="bName" autocomplete="organization" /></label>
+    <label>Tool website<input type="url" id="bUrl" placeholder="https://" /></label>
+    <label id="bCatWrap" hidden>Category<select id="bCat"><option value="">Choose a category</option><option value="Video">Video</option><option value="Productivity">Productivity</option><option value="Code">Code</option><option value="Writing">Writing</option><option value="Image">Image</option><option value="Audio">Audio</option><option value="3D &amp; Design">3D &amp; Design</option><option value="Chatbots">Chatbots</option><option value="Marketing">Marketing</option><option value="Business">Business</option><option value="Education">Education</option><option value="Search">Search</option><option value="Health">Health</option><option value="Presentations">Presentations</option><option value="Avatar">Avatar</option></select></label>
+    <label>Preferred start date<input type="date" id="bStart" /></label>
+    <label>Your email<input type="email" id="bEmail" autocomplete="email" /></label>
+    <label class="full">Anything else? (optional)<textarea id="bNotes" placeholder="For example: tool isn't listed yet, or a campaign you want to line up with"></textarea></label>
+    <input type="text" id="bCompany" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" />
+  </div>
+  <button id="bBtn" onclick="bookPlacement()">Request booking →</button>
+  <div class="book-msg" id="bMsg" role="status"></div>
+  <p class="note">By booking, you agree to the <a href="/terms">Listing Terms</a>. See <a href="/terms#not-accepted">what we don't accept</a>.</p>
+</section>
+<script>
+const BOOK = {"spotlight":{"label":"Homepage Spotlight ($99)","url":"https://buy.stripe.com/aFa14h1C5ftb51n1c6g7e01","booked":false},"category":{"label":"Category Featured ($39)","url":"https://buy.stripe.com/7sYeV72G9bcVfG15smg7e02","booked":false}};
+const BOOK_LOADED_AT = Date.now();
+function pickPlan(p) {
+  document.getElementById("bPlan").value = p;
+  document.getElementById("bCatWrap").hidden = p !== "category";
+}
+function bookMsg(text, err) {
+  const m = document.getElementById("bMsg");
+  m.textContent = text; m.className = "book-msg" + (err ? " err" : ""); m.style.display = "block";
+}
+async function bookPlacement() {
+  const v = id => document.getElementById(id).value.trim();
+  const plan = v("bPlan");
+  if (document.getElementById("bCompany").value || Date.now() - BOOK_LOADED_AT < 4000) { bookMsg("✓ Request received! We'll email you to confirm your start date."); return; }
+  if (!v("bName") || !v("bUrl") || !v("bEmail")) { bookMsg("Please fill in the tool name, website and your email.", true); return; }
+  if (!/^\S+@\S+\.\S+$/.test(v("bEmail"))) { bookMsg("Please enter a valid email address.", true); return; }
+  if (plan === "category" && !v("bCat")) { bookMsg("Please choose a category.", true); return; }
+  const btn = document.getElementById("bBtn");
+  btn.disabled = true; btn.textContent = "Sending…";
+  try {
+    const res = await fetch("https://forminit.com/f/nbcomhc4z98", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({ blocks: [
+        { type: "sender", properties: { email: v("bEmail") } },
+        { type: "text", name: "listing_type", value: "featured: " + BOOK[plan].label },
+        { type: "text", name: "tool_name", value: v("bName") },
+        { type: "text", name: "tool_url", value: v("bUrl") },
+        { type: "text", name: "category", value: plan === "category" ? v("bCat") : "(homepage spotlight)" },
+        { type: "text", name: "start_date", value: v("bStart") || "as soon as possible" },
+        { type: "text", name: "description", value: v("bNotes") || "-" }
+      ] })
+    });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || "Something went wrong. Please try again, or email hello@ellnow.com."); }
+    ["bName","bUrl","bStart","bEmail","bNotes"].forEach(id => document.getElementById(id).value = "");
+    if (BOOK[plan].url && !BOOK[plan].booked) {
+      bookMsg("✓ Request received! Taking you to secure checkout…");
+      setTimeout(() => { window.location.href = BOOK[plan].url; }, 1500);
+    } else {
+      bookMsg("✓ Request received! We'll check your tool and email you within 2 business days with your start date and a secure payment link.");
+    }
+  } catch (e) {
+    bookMsg(e.message && e.message !== "Failed to fetch" ? e.message : "Network error. Please check your connection and try again.", true);
+  } finally {
+    btn.disabled = false; btn.textContent = "Request booking →";
+  }
+}
+if (location.hash === "#book-category") { pickPlan("category"); document.getElementById("book").scrollIntoView(); }
+</script>
+<h2>How it works</h2>
+<ul class="lead">
+  <li>Your tool needs to be listed on Ellnow, or approved through Fast-track, before a placement starts.</li>
+  <li>Book with the form above. We confirm the start date by email, then you pay. The placement runs for 30 days and then ends on its own. There's no subscription.</li>
+  <li>Featured links are marked as sponsored, as search engines require for paid links.</li>
+  <li>We don't sell placements to tools on our <a href="/terms#not-accepted">not-accepted list</a>. If we can't run your placement, you get a full refund.</li>
+</ul>
+<p class="note">Ellnow is a new, growing directory, and prices reflect that. Questions? Email <a href="mailto:hello@ellnow.com">hello@ellnow.com</a>. Placements are covered by the <a href="/terms">Listing Terms</a>.</p>
+</main>
+<footer>
+  <div class="footer-links">
+    <a href="/">Home</a>
+    <a href="/#faq">FAQ</a>
+    <a href="/#submit">Submit a Tool</a>
+    <a href="/advertise">Advertise</a>
+    <a href="/terms">Terms</a>
+  </div>
+  <p>© 2026 Ellnow · Find the right AI tool, right now.</p>
+</footer>
+</body>
+</html>

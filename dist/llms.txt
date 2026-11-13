@@ -1,0 +1,38 @@
+# Ellnow
+
+> Ellnow (ellnow.com) is a free directory of 207 AI tools across 15 categories. Each listing shows what the tool does, whether it is free, freemium or paid, and an editor's score. New tools are added weekly.
+
+Ellnow lists tools people can sign up for and use directly. Each product is listed once; duplicate or copycat listings are not accepted. Scores are editor's scores, not user reviews. Some outbound links are affiliate links; they do not affect listings or scores.
+
+## Main pages
+
+- [Ellnow home and full tool list](https://www.ellnow.com/): all tools, searchable and filterable by category and pricing
+- [FAQ](https://www.ellnow.com/#faq): answers to common questions, such as the best AI video, image, writing, coding and voice tools
+- [Submit a tool](https://www.ellnow.com/#submit): how AI tool makers can request a listing
+
+## Guides
+
+- [Best AI writing tools in 2026](https://www.ellnow.com/best-ai-writing-tools): Writing tools grouped by use case
+
+## Categories
+
+- [Best AI Video Tools](https://www.ellnow.com/category/video): 28 tools. Top-rated: Sora, Runway, Veo 3, HeyGen
+- [Best AI Productivity Tools](https://www.ellnow.com/category/productivity): 22 tools. Top-rated: ChatGPT, Claude, Perplexity, NotebookLM
+- [Best AI Code Tools](https://www.ellnow.com/category/code): 19 tools. Top-rated: GitHub Copilot, Cursor, Claude Code, Bolt.new
+- [Best AI Writing Tools](https://www.ellnow.com/category/writing): 19 tools. Top-rated: Grammarly, Jasper, Notion AI, Talkpal AI
+- [Best AI Image Tools](https://www.ellnow.com/category/image): 18 tools. Top-rated: Midjourney, Flux, DALL·E 3, Remove.bg
+- [Best AI Audio Tools](https://www.ellnow.com/category/audio): 16 tools. Top-rated: ElevenLabs, Suno, Adobe Podcast, Krisp
+- [Best AI 3D & Design Tools](https://www.ellnow.com/category/3d-and-design): 15 tools. Top-rated: Framer AI, Luma AI, Figma AI, Galileo AI
+- [Best AI Chatbots](https://www.ellnow.com/category/chatbots): 14 tools. Top-rated: Intercom Fin, Grok, Microsoft Copilot, Botpress
+- [Best AI Marketing Tools](https://www.ellnow.com/category/marketing): 13 tools. Top-rated: Surfer SEO, AdCreative.ai, Phrasee, Smartly.io
+- [Best AI Business Tools](https://www.ellnow.com/category/business): 11 tools. Top-rated: Gong, Apollo.io, Clay, HubSpot AI
+- [Best AI Education Tools](https://www.ellnow.com/category/education): 9 tools. Top-rated: Duolingo Max, Khanmigo, Socratic, Quizlet AI
+- [Best AI Search Tools](https://www.ellnow.com/category/search): 7 tools. Top-rated: Elicit, Phind, Consensus, Exa AI
+- [Best AI Health Tools](https://www.ellnow.com/category/health): 6 tools. Top-rated: Whoop AI, Calm AI, Ada Health, Woebot
+- [Best AI Presentation Tools](https://www.ellnow.com/category/presentations): 5 tools. Top-rated: Gamma, Tome, Beautiful.ai, Pitch
+- [Best AI Avatar Tools](https://www.ellnow.com/category/avatar): 5 tools. Top-rated: D-ID, Akool, Viggle, Haiper
+
+## Optional
+
+- [Sitemap](https://www.ellnow.com/sitemap.xml): every tool page is at https://www.ellnow.com/tools/<tool-name>
+- Contact: hello@ellnow.com
