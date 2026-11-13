@@ -229,6 +229,9 @@ const GUIDES = [
   {
     slug: "best-ai-writing-tools",
     cat: "Writing",
+    pool: "category",
+    noun: "AI writing tools",
+    metaDesc: n => `Compare ${n} AI writing tools by what you need: editing, marketing copy, long-form articles, fiction and rewriting. Pricing and editor's scores included.`,
     exclude: ["Talkpal AI"],
     h1: `Best AI writing tools in ${YEAR}`,
     lead: n => `There's no single best AI writing tool, because "writing" covers very different jobs: polishing grammar, drafting marketing copy, producing long articles, writing fiction. This guide compares ${n} tools Ellnow lists, grouped by the job you need done, with each tool's pricing model and editor's score.`,
@@ -247,6 +250,33 @@ const GUIDES = [
       ["Can AI writing tools replace a human writer?", "They speed up drafting and editing, but their output still needs a person to check facts, tone and originality. Treat them as an assistant, not a replacement."],
       ["How are the scores on this page decided?", "They're Ellnow's own editor's scores out of 5, not user reviews. Paid placements and affiliate links never change a score."],
     ],
+  },
+  {
+    slug: "best-ai-video-tools-for-training-teams",
+    cat: "Video",
+    noun: "AI video tools for training teams",
+    metaDesc: n => `Compare ${n} AI video tools for training and L&D teams: avatar presenters, script-to-video, editing and captions. Pricing and editor's scores included, plus Synthesia alternatives.`,
+    h1: `Best AI video tools for training teams in ${YEAR}`,
+    lead: n => `Training videos used to mean a camera, a presenter and a lot of re-shoots. AI video tools let learning and development (L&D) teams turn a script or document into a finished video, often with an AI presenter. This guide compares ${n} tools Ellnow lists, grouped by the job you need done, with each tool's pricing model and editor's score.`,
+    groups: [
+      { h: "Best for training and L&D videos", names: ["Colossyan", "Synthesia", "HeyGen"], why: "Colossyan is listed as an AI video platform built for L&D teams, and Synthesia and HeyGen are the two highest-scoring avatar video tools here. All three create videos with AI presenters from a script." },
+      { h: "Best AI avatar and presenter tools", names: ["Synthesia", "HeyGen", "Hour One", "D-ID", "Vidnoz"], why: "These put a talking AI presenter on screen. Synthesia needs no camera, Hour One is aimed at business communication, D-ID animates a still photo to speak your text, and Vidnoz has a free plan with templates and avatars." },
+      { h: "Best for turning scripts and documents into video", names: ["Invideo AI", "Pictory", "Fliki", "Explainer Video Generator"], why: "Paste in a script, blog post or document and get a video with stock visuals and AI voiceover. Useful for turning existing training material into short videos quickly." },
+      { h: "Best for editing recorded training and adding captions", names: ["Descript", "Veed.io", "Kapwing", "Captions"], why: "For videos you've already recorded. Descript lets you edit video by editing the transcript, and Veed.io, Kapwing and Captions add AI subtitles and cleanup." },
+      { h: "Best for screen recordings", names: ["Supercut"], why: "A screen and video recorder with AI transcripts and shareable clip timestamps, handy for software walkthroughs." },
+    ],
+    faq: (list, free) => {
+      const avatars = ["Synthesia", "HeyGen", "Colossyan", "Hour One", "D-ID", "Vidnoz"].map(n => list.find(t => t.name === n));
+      const alts = avatars.filter(t => t.name !== "Synthesia").sort(byRating);
+      const syn = list.find(t => t.name === "Synthesia");
+      return [
+        ["What is the best AI video tool for training videos?", `Colossyan is listed as built for L&D teams, while Synthesia and HeyGen have the highest editor's scores among avatar video tools here (${score(syn.rating)} / 5). The best fit depends on whether you want an AI presenter, a script-to-video tool, or an editor for footage you've already recorded.`],
+        ["What are the best alternatives to Synthesia?", `Among the tools Ellnow lists, ${listJoin(alts.slice(0, 4).map(t => t.name))} also create AI presenter videos. Compare them with the table on this page, and check each tool's own site for current pricing and features.`],
+        ["Do I need a camera to make an AI training video?", "Not with avatar tools. Synthesia, for example, is listed as creating videos with avatars from a script, with no camera needed. Tools like Descript and Veed.io are for editing footage you've already recorded."],
+        ["Are there free AI video tools for training?", `Yes. ${free.length} of the ${list.length} tools listed here are free or have a free plan, including ${listJoin(free.slice().sort(byRating).slice(0, 4).map(t => t.name))}. Free plans are usually limited, so check each tool's site for current limits.`],
+        ["How are the scores on this page decided?", "They're Ellnow's own editor's scores out of 5, not user reviews. Paid placements and affiliate links never change a score."],
+      ];
+    },
   },
 ];
 const GUIDES_BY_CAT = Object.fromEntries(GUIDES.map(g => [g.cat, g]));
@@ -449,7 +479,8 @@ if (location.hash === "#book-category") { pickPlan("category"); document.getElem
 
 const guideUrl = g => `${SITE}/${g.slug}`;
 for (const g of GUIDES) {
-  const list = byCat[g.cat].filter(t => !(g.exclude || []).includes(t.name));
+  const poolNames = g.pool || [...new Set(g.groups.flatMap(x => x.names))];
+  const list = g.pool === "category" ? byCat[g.cat].filter(t => !(g.exclude || []).includes(t.name)) : poolNames.map(n => { const t = tools.find(x => x.name === n); if (!t) throw new Error(`guide ${g.slug}: tool "${n}" not found`); return t; });
   const byName = Object.fromEntries(list.map(t => [t.name, t]));
   for (const grp of g.groups) for (const n of grp.names) if (!byName[n]) throw new Error(`guide ${g.slug}: tool "${n}" not found in ${g.cat}`);
   const free = list.filter(t => t.pricing !== "paid");
@@ -464,7 +495,7 @@ ${g.groups.map(grp => `<h2>${esc(grp.h)}</h2>
   <tr><th>Tool</th><th class="hide-sm">What it does</th><th>Pricing</th><th>Score</th></tr>
 ${grp.names.map(n => byName[n]).map(t => `  <tr><td><a href="/tools/${t.slug}">${esc(t.name)}</a></td><td class="hide-sm">${esc(t.desc)}</td><td>${pricingText(t.pricing)}</td><td>${score(t.rating)}</td></tr>`).join("\n")}
 </table>`).join("\n")}
-<h2>All ${list.length} AI writing tools compared</h2>
+<h2>All ${list.length} ${esc(g.noun)} compared</h2>
 <table class="list">
   <tr><th>Tool</th><th class="hide-sm">What it does</th><th>Pricing</th><th>Score</th></tr>
 ${[...list].sort(byRating).map(t => `  <tr><td><a href="/tools/${t.slug}">${esc(t.name)}</a>${isFeatured(t) ? '<span class="feat-pill">Featured</span>' : ""}</td><td class="hide-sm">${esc(t.desc)}</td><td>${pricingText(t.pricing)}</td><td>${score(t.rating)}</td></tr>`).join("\n")}
@@ -476,7 +507,7 @@ ${faq.map(([q, a]) => `<h3>${esc(q)}</h3>\n<p>${esc(a)}</p>`).join("\n")}
 ${catChips(g.cat)}`;
   write(`${g.slug}.html`, shell({
     title: `${g.h1}: ${list.length} tools compared | Ellnow`,
-    description: `Compare ${list.length} AI writing tools by what you need: editing, marketing copy, long-form articles, fiction and rewriting. Pricing and editor's scores included.`,
+    description: g.metaDesc(list.length),
     canonical: guideUrl(g),
     body,
     jsonld: [
